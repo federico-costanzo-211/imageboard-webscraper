@@ -1,21 +1,45 @@
 const puppeteer = require('puppeteer');
 const fs = require('node:fs');
+const path = require('path');
 
 const websiteArray = [
     'https://safebooru.org'
 ];
-const query = 'ishmael_(project_moon)';
+const query = 'eren_jaeger';
+const downloadFilepath = path.join(__dirname, 'images');
+const pageSearchNumber = 3; //W.I.P.
 
-async function downloadImageFromBooruSite(page){
-    if (!fs.existsSync("./images")){
-        fs.mkdirSync("./images");
+//----------------------------------------------------------
+
+async function downloadImageFromBooruPage(page, filepath){
+    if (!fs.existsSync(filepath)){
+        fs.mkdirSync(filepath);
     };
-
-    const image = await page.evaluate(() => {
-        return document.querySelector("img #image").src;
+    
+    const imageUrl = await page.evaluate(() => {
+        let image = document.querySelector("#image");
+        return [image.src, image.alt];
     });
 
+    const imageArrayBuffer = await fetch(imageUrl[0], {
+        method: "GET",
+        mode: "no-cors"
+    })
+    .then(async (response) => await response.blob())
+    .then(async (response) => await response.arrayBuffer());
+    const imageBuffer = Buffer.from(imageArrayBuffer);
+    
+    const filename = imageUrl[1].replace(/\. \s \\{2}/g, "-").substring(0, 250) + ".png";
+    console.log(filename);
+    fs.writeFileSync(path.join(filepath, filename), imageBuffer, {flag: 'a+'});
 };
+
+//----------------------------------------------------------------
+
+//todo: page browsing
+//todo: add error catching
+    //todo: add retry in case of error 404
+    //todo: add catch for timeout error
 
 
 async function main(){
@@ -42,36 +66,23 @@ async function main(){
             })
         ]);
 
-        //todo: add retry in case of error 404
-        //todo: add catch for timeout error
-
         //testing
         await page.screenshot({path: 'test.png'});
 
         const linkList = await page.evaluate(() => {
             const nodeList = document.querySelectorAll('.thumb > a');
             const linkList = [];
-
+    
             nodeList.forEach((element) => {
                 linkList.push(element.href);
             });
-
+    
             return linkList;
         });
-
-        //*testing
-        console.log("Array: \n");
-        console.log(linkList);
-
-        let counter = 0;
+    
         for (let link of linkList){
             await page.goto(link);
-
-            //testing
-            console.log(`------------------- ${link} -------------------\n`);
-            await page.screenshot({path: "images/image" + counter + ".png"});
-
-            counter += 1;
+            await downloadImageFromBooruPage(page, downloadFilepath);
         };
     };
 
