@@ -6,6 +6,18 @@ const websiteArray = [
 ];
 const query = 'ishmael_(project_moon)';
 
+async function downloadImageFromBooruSite(page){
+    if (!fs.existsSync("./images")){
+        fs.mkdirSync("./images");
+    };
+
+    const image = await page.evaluate(() => {
+        return document.querySelector("img #image").src;
+    });
+
+};
+
+
 async function main(){
     const browser = await puppeteer.launch({
         headless: 'false'
@@ -16,6 +28,7 @@ async function main(){
         height: 1080
     });
     console.log('Launch successful!');
+
 
     for (let website of websiteArray){
         await page.goto(website);
@@ -46,11 +59,20 @@ async function main(){
             return linkList;
         });
 
-        await page.screenshot({path: 'test2.png'});
-
-        //testing
+        //*testing
         console.log("Array: \n");
         console.log(linkList);
+
+        let counter = 0;
+        for (let link of linkList){
+            await page.goto(link);
+
+            //testing
+            console.log(`------------------- ${link} -------------------\n`);
+            await page.screenshot({path: "images/image" + counter + ".png"});
+
+            counter += 1;
+        };
     };
 
     await browser.close();
