@@ -5,7 +5,7 @@ const path = require('path');
 const websiteArray = [
     'https://safebooru.org'
 ];
-const query = 'eren_jaeger';
+const query = '';
 const downloadFilepath = path.join(__dirname, 'images');
 const pageSearchNumber = 3; //W.I.P.
 
@@ -21,15 +21,16 @@ async function downloadImageFromBooruPage(page, filepath){
         return [image.src, image.alt];
     });
 
-    const imageArrayBuffer = await fetch(imageUrl[0], {
+    const imageBuffer = await fetch(imageUrl[0], {
         method: "GET",
         mode: "no-cors"
     })
     .then(async (response) => await response.blob())
-    .then(async (response) => await response.arrayBuffer());
-    const imageBuffer = Buffer.from(imageArrayBuffer);
+    .then(async (response) => await response.arrayBuffer())
+    .then((response) => Buffer.from(response))
+    .catch((error) => console.error(error));
     
-    const filename = imageUrl[1].replace(/\. \s \\{2}/g, "-").substring(0, 250) + ".png";
+    const filename = imageUrl[1].replace(/\.\s \!? \, \\{2}/g, "-").substring(0, 250) + ".png";
     console.log(filename);
     fs.writeFileSync(path.join(filepath, filename), imageBuffer, {flag: 'a+'});
 };
