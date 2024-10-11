@@ -61,7 +61,7 @@ async function main(){
                 await page.locator('#tags').fill(query);
 
                 await Promise.all([
-                    page.click('input[type=submit]'),
+                    page.click('[type=submit]'),
                     page.waitForNavigation({
                         waitUntil: 'networkidle2'
                     })
@@ -82,7 +82,7 @@ async function main(){
         await page.screenshot({path: 'test.png'});
         
         const linkList = await page.evaluate(() => {
-            const nodeList = document.querySelectorAll('.thumb > a');
+            const nodeList = document.querySelectorAll('span > a, .post-preview-link > a');
             const linkList = [];
     
             nodeList.forEach((element) => {
@@ -92,6 +92,8 @@ async function main(){
             return linkList;
         });
         
+        console.log(linkList);
+
         if (linkList.length === 0) {
             console.log("No posts found. Moving to next site...");
             continue;
