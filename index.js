@@ -52,8 +52,7 @@ async function main(){
 
 
     for (let website of websiteArray){
-        let attempt_counter = 0;
-        while (attempt_counter < 3){
+        for (let attempt_counter = 0; attempt_counter < 3; attempt_counter++){
             try {
                 await page.goto(website);
                 console.log(`\n------------------- ${website} -------------------\n`);
@@ -66,11 +65,11 @@ async function main(){
                         waitUntil: 'networkidle2'
                     })
                 ]);
+
                 break;
             } catch (err){
                 if (err instanceof puppeteer.TimeoutError){
                     console.log(`Attempt ${attempt_counter + 1} of 3 failed, reloading page...`);
-                    attempt_counter++;
                 } else {
                     console.error("Error: site could not be reached. Please try again.")    
                     break;
@@ -91,23 +90,26 @@ async function main(){
     
             return linkList;
         });
-        
-        console.log(linkList);
 
-        if (linkList.length === 0) {
-            console.log("No posts found. Moving to next site...");
-            continue;
+        for (let pageCounter = 0; pageCounter < pageSearchNumber; pageCounter++){
+            if (linkList.length === 0){
+                console.log("No posts found. Moving to next site...");
+                break;
+            } else {
+                for (let link of linkList){
+                    await page.goto(link);
+                    await downloadImageFromBooruPage(page, downloadFilepath);
+                };
+            
+                console.log("All images in page downloaded!");
+                break; //to remove later
+            };
         };
 
-        for (let link of linkList){
-            await page.goto(link);
-            await downloadImageFromBooruPage(page, downloadFilepath);
-        };
-
-        console.log("All images in page downloaded!");
-    };
+        //TODO: add code to move to next pages
 
     await browser.close();
+    };
 };
 
 main();
