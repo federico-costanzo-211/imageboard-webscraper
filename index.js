@@ -8,7 +8,7 @@ puppeteer.use(StealthPlugin());
 const websiteArray = [
     'https://safebooru.org', //example site
 ];
-const query = '';
+const query = 'gojou_satoru';
 const downloadFilepath = path.join(__dirname, 'images');
 const pageSearchNumber = 2;
 
@@ -71,6 +71,7 @@ async function main(){
                         waitUntil: 'networkidle2'
                     })
                 ]);
+                
                 break;
 
             } catch (err){
